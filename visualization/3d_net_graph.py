@@ -8,8 +8,11 @@ import pandas as pd
 import pickle 
 import streamlit as st
 from datetime import datetime
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 
 folder_path = "../data/graphs_info/"
+
 @st.cache_data
 def load_graph_data(year, month):
     path = os.path.join(folder_path, f"{str(year)}/{month}_month/")
@@ -58,6 +61,7 @@ def draw_graph_3d(G, pos, partition, measures, title, min_node_size, max_node_si
     node_z = []
     node_colors = []  # List to store node colors
     partition_nodes = {pid: [] for pid in set(partition.values())}
+    cluster_pos = {pid: [] for pid in set(partition.values())}
     for node in G.nodes():
         x, y, z = pos[node]
         node_x.append(x)
@@ -66,6 +70,7 @@ def draw_graph_3d(G, pos, partition, measures, title, min_node_size, max_node_si
         # Assign color based on partition
         node_colors.append(partition[node])
         partition_nodes[partition[node]].append(node)
+        cluster_pos[partition[node]].append((x,y,z))
     node_trace = go.Scatter3d(
         x=node_x, y=node_y, z=node_z,
         mode='markers',
@@ -113,7 +118,54 @@ def draw_graph_3d(G, pos, partition, measures, title, min_node_size, max_node_si
         scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
         # scene_camera=camera
     )
-    return fig
+
+    tf_idf = TfidfVectorizer()
+    nodes_topic = dict()
+    top_n = 5
+    annotations = []
+    for pid in set(partition.values()) :
+        output = tf_idf.fit_transform(partition_nodes[pid])
+        feature_names = tf_idf.get_feature_names_out()
+        tfidf_scores = output.max(0).toarray()[0]
+        important_words = {word: score for word, score in zip(feature_names, tfidf_scores)}
+        important_words_sorted = dict(sorted(important_words.items(), key=lambda x: x[1], reverse=True))
+        annotation_text = "/ ".join(list(important_words_sorted.keys())[:top_n])
+        nodes_topic[pid] = annotation_text
+        p = np.array(cluster_pos[pid]).mean(axis=0)
+        annotation = dict(
+            x=p[0],
+            y=p[1],
+            z=p[2],
+            text=annotation_text,
+            xanchor="center",
+            yanchor="bottom",
+            showarrow=False,
+            font=dict(size=10),
+        )
+        annotations.append(annotation)
+    
+    # annotations = []
+    # for pid, topics in nodes_topic.items():
+    #     annotation_text = f"Cluster {pid}:<br>"
+    #     p = np.array(cluster_pos[pid]).mean(axis=0)
+    #     for word, score in topics:
+    #         annotation_text += f"{word}: {score:.2f}<br>"
+    #     annotation = dict(
+    #         x=1,
+    #         y=1,
+    #         z=1,
+    #         text=annotation_text,
+    #         xanchor="center",
+    #         yanchor="bottom",
+    #         showarrow=False,
+    #         font=dict(size=10),
+    #     )
+    #     annotations.append(annotation)
+
+    fig.update_layout(scene=dict(
+        annotations=annotations
+    ))
+    return fig, nodes_topic
 
 st.title('Streamlit Assignment')
 # Slider for selecting month from January 2018 to December 2023
@@ -138,6 +190,7 @@ for index, row in df.iterrows():
 
 Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
 
-fig = draw_graph_3d(Gcc, positions, partition, bc, "3D graph", min_node_size=10, max_node_size=100)
+fig, node_topics = draw_graph_3d(Gcc, positions, partition, bc, "3D graph", min_node_size=10, max_node_size=100)
 
 st.plotly_chart(fig)
+st.write(node_topics)
