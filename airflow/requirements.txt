@@ -1,0 +1,6 @@
+scikit-learn
+nltk
+re
+networkx
+community
+sentence-transformers

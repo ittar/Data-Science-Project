@@ -1,1 +1,4 @@
 data/
+logs/
+plugins/
+__pycache__/
