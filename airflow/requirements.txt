@@ -1,6 +1,6 @@
-scikit-learn
-nltk
-re
-networkx
-community
-sentence-transformers
+scikit-learn==0.24.2
+networkx==2.6.3
+python-louvain==0.15
+nltk==3.6.5
+pandas==1.3.3
+sentence-transformers==2.1.0    
