@@ -15,6 +15,7 @@ def clear_arxiv_file():
 
 def get_all_main_links():
     request = requests.get("https://arxiv.org/")
+    returns_list = []
     if (request.status_code == 200):
         soup = BeautifulSoup(request.content, 'html.parser')
         all_main = soup.find('div', id='content').find_all('ul')
@@ -29,7 +30,7 @@ def get_all_main_links():
 
 def get_data_by_link(file):
     try:
-        inside_req = requests.get("https://arxiv.org" + file)
+        inside_req = requests.get(file)
         inside_soup = BeautifulSoup(inside_req.content, 'html.parser')
 
         data = inside_soup.find('div', id='content-inner')
@@ -82,31 +83,32 @@ link_from_month = [
 ]
 
 print("run")
-links1 = get_all_main_links()
+links = get_all_main_links()
 time.sleep(1)
 clear_arxiv_file()
-for link in links1:
-    if(link[1:].split('/')[0] == 'archive'):
-        continue
-    request = requests.get("https://arxiv.org" + link)
-    soup = BeautifulSoup(request.content, 'html.parser')
-    inside_files = [x['href'] for x in soup.find('div', id='dlpage').find_all('a', title='Abstract')]
-    for inside_file in inside_files:
-        data = get_data_by_link("https://arxiv.org" + inside_file)
+#for link in links:
+#    if(link[1:].split('/')[0] == 'archive'):
+#        continue
+#    request = requests.get("https://arxiv.org" + link)
+#    soup = BeautifulSoup(request.content, 'html.parser')
+#    inside_files = [x['href'] for x in soup.find('div', id='dlpage').find_all('a', title='Abstract')]
+#    for inside_file in inside_files:
+#        data = get_data_by_link("https://arxiv.org" + inside_file)
 
-        with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow(data)
-            #time.sleep(1)
+#        with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
+#            writer = csv.writer(file)
+#            writer.writerow(data)
 
 for link in link_from_month:
     request = requests.get(link)
     soup = BeautifulSoup(request.content, 'html.parser')
-    inside_files = [x['href'] for x in soup.find('div', id='dlpage').find_all('a', title='Abstract')]
+    print(request.content)
+    inside_files = [x['href'] for x in soup.find('div', class_='content').find_all('a')]
+    print(len(inside_file))
     for inside_file in inside_files:
         data = get_data_by_link("https://arxiv.org" + inside_file)
 
         with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(data)
-            #time.sleep(1)
+            time.sleep(1)
