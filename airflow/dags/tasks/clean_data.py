@@ -38,7 +38,7 @@ def text_preprocessing(s):
 
     return s
 
-def clean_data(name):
+def clean_data():
     df = pd.read_csv(f'/opt/airflow/data/{name}.csv')
     clean_cols = ['abstract']
 

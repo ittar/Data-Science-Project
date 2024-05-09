@@ -1,7 +1,10 @@
 from airflow import DAG
-from airflow import DAG
-from airflow.operators.bash_operator import BashOperator
-
+from tasks.build_graph import build_graph
+from tasks.clean_data import clean_data
+from tasks.find_keyword import find_keyword
+from tasks.transform_data import transform_data
+from tasks.transform_data import web_scrape
+from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
 
 default_args = {
@@ -12,50 +15,40 @@ default_args = {
 
 
 dag = DAG(
-    'tutorial',
+    'DSDE',
     default_args=default_args,
-    description='A simple tutorial DAG',
+    description='From scrape to graph info',
     schedule_interval=timedelta(days=1),
 )
 
-# t1, t2 and t3 are examples of tasks created by instantiating operators
-t1 = BashOperator(
-    task_id='print_date',
-    bash_command='date',
+scrape_task = PythonOperator(
+    task_id='Scrape web from arxiv',
+    python_callable=web_scrape,
     dag=dag,
 )
 
-t1.doc_md = """\
-#### Task Documentation
-You can document your task using the attributes `doc_md` (markdown),
-`doc` (plain text), `doc_rst`, `doc_json`, `doc_yaml` which gets
-rendered in the UI's Task Instance Details page.
-![img](http://montcs.bloomu.edu/~bobmon/Semesters/2012-01/491/import%20soul.png)
-"""
-
-dag.doc_md = __doc__
-
-t2 = BashOperator(
-    task_id='sleep',
-    depends_on_past=False,
-    bash_command='sleep 5',
+clean_task = PythonOperator(
+    task_id='Clean abstract',
+    python_callable=clean_data,
     dag=dag,
 )
 
-templated_command = """
-{% for i in range(5) %}
-    echo "{{ ds }}"
-    echo "{{ macros.ds_add(ds, 7)}}"
-    echo "{{ params.my_param }}"
-{% endfor %}
-"""
-
-t3 = BashOperator(
-    task_id='templated',
-    depends_on_past=False,
-    bash_command=templated_command,
-    params={'my_param': 'Parameter I passed in'},
+transform_task = PythonOperator(
+    task_id='Transform abstract to Vector and find similarity vector',
+    python_callable=transform_data,
     dag=dag,
 )
 
-t1 >> [t2, t3]
+build_task = PythonOperator(
+    task_id='Build graph node information and cluster',
+    python_callable=build_graph,
+    dag=dag,
+)
+
+keyword_task = PythonOperator(
+    task_id='Find keyword in each network cluster',
+    python_callable=find_keyword,
+    dag=dag,
+)
+
+clean_task >> transform_data >> build_graph >> find_keyword

@@ -3,7 +3,7 @@ import pandas as pd
 import networkx as nx
 import community as community_louvain
 
-def build_graph(name):
+def build_graph():
     for i in range(1,13):
         df = pd.read_csv(f'/opt/airflow/data/{i}/graph.csv')
         G = nx.Graph()

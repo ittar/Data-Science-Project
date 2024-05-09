@@ -3,7 +3,7 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-def transform_data(name):
+def transform_data():
     model = SentenceTransformer('WhereIsAI/UAE-Large-V1')
 
     df = pd.read_csv(f'/opt/airflow/data/{name}.csv')

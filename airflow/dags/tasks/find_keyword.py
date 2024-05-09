@@ -10,7 +10,7 @@ def load_data(month):
     return partition
 
 
-def find_keyword(name):
+def find_keyword():
     df = pd.read_csv(f'/opt/airflow/data/{name}.csv')
     words = df.abstract.values
     for i in range(1,13):
