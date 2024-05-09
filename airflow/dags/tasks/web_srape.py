@@ -83,7 +83,7 @@ def web_scrape():
         'date-filter_by': 'date_range',
         'date-from_date': '2024-01-01',
         'date-to_date': '2024-01-31',
-        'size': '200',
+        'size': '5',
     }
     params2 = {
         'advanced': '1',
@@ -91,7 +91,7 @@ def web_scrape():
         'date-filter_by': 'date_range',
         'date-from_date': '2024-02-01',
         'date-to_date': '2024-02-29',
-        'size': '200',
+        'size': '5',
     }
     params3 = {
         'advanced': '1',
@@ -99,7 +99,7 @@ def web_scrape():
         'date-filter_by': 'date_range',
         'date-from_date': '2024-03-01',
         'date-to_date': '2024-03-31',
-        'size': '200',
+        'size': '5',
     }
     params4 = {
         'advanced': '1',
@@ -107,7 +107,7 @@ def web_scrape():
         'date-filter_by': 'date_range',
         'date-from_date': '2024-04-01',
         'date-to_date': '2024-04-30',
-        'size': '200',
+        'size': '5',
     }
     params5 = {
         'advanced': '1',
@@ -115,7 +115,7 @@ def web_scrape():
         'date-filter_by': 'date_range',
         'date-from_date': '2024-05-01',
         'date-to_date': '2024-05-31',
-        'size': '200',
+        'size': '5',
     }
 
     link_from_month = [params1, params2, params3, params4, params5]
