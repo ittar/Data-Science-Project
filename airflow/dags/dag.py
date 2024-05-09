@@ -1,9 +1,9 @@
 from airflow import DAG
 from tasks.build_graph import build_graph
+from tasks.build_graph import web_scrape
 from tasks.clean_data import clean_data
 from tasks.find_keyword import find_keyword
 from tasks.transform_data import transform_data
-from tasks.transform_data import web_scrape
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
 
@@ -51,4 +51,4 @@ keyword_task = PythonOperator(
     dag=dag,
 )
 
-clean_task >> transform_data >> build_graph >> find_keyword
+scrape_task >> clean_task >> transform_data >> build_graph >> find_keyword
