@@ -132,7 +132,7 @@ def web_scrape():
         inside_files = [x['href'] for x in soup.find('div', id='dlpage').find_all('a', title='Abstract')]
         for inside_file in inside_files:
             title, abstract, day, month, year = get_data_by_link("https://arxiv.org" + inside_file)
-            df = pd.concat(df, pd.DataFrame({'title' : [title], 'abstract' : [abstract], 'day': [day], 'month': [month], 'year': [year]}))
+            df = pd.concat([df, pd.DataFrame({'title' : [title], 'abstract' : [abstract], 'day': [day], 'month': [month], 'year': [year]})])
             time.sleep(1)
             
     for param in link_from_month:
@@ -141,6 +141,6 @@ def web_scrape():
         inside_files = [x.find('a')['href'] for x in soup.find('div', class_='content').find_all('li', class_='arxiv-result')]
         for inside_file in inside_files:
             title, abstract, day, month, year = get_data_by_link(inside_file)
-            df = pd.concat(df, pd.DataFrame({'title' : [title], 'abstract' : [abstract], 'day': [day], 'month': [month], 'year': [year]}))
+            df = pd.concat([df, pd.DataFrame({'title' : [title], 'abstract' : [abstract], 'day': [day], 'month': [month], 'year': [year]})])
             time.sleep(1)
     df.to_csv('/opt/airflow/data/arxiv.csv')
