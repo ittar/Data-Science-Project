@@ -6,7 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 def transform_data():
     model = SentenceTransformer('WhereIsAI/UAE-Large-V1')
 
-    df = pd.read_csv(f'/opt/airflow/data/{name}.csv')
+    df = pd.read_csv('/opt/airflow/data/graphs_info_UAE_v3/2024/2024_paper_info.csv')
     words = df.abstract.values
     vectors = model.encode(words)
     df['abs_vector'] = vectors.tolist()
@@ -30,4 +30,4 @@ def transform_data():
             app_df = pd.DataFrame({'target': [target], 'source': [source], 'weight': [weight]})
             tmp_df = pd.concat([tmp_df, app_df])
 
-        df_node.to_csv(f'/opt/airflow/data/{i}/graph.csv')
+        df_node.to_csv(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month/graph.csv')

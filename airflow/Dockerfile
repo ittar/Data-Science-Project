@@ -7,5 +7,7 @@ USER root
 RUN sudo apt upgrade python3.9
 # RUN python3 -m pip install --upgrade pip
 # RUN pip install python
+USER airflow
+RUN pip install -U sentence-transformers
 RUN python3 -m pip install -r requirements.txt
 EXPOSE 5000

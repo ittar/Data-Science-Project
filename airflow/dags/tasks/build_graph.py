@@ -5,7 +5,7 @@ import community as community_louvain
 
 def build_graph():
     for i in range(1,13):
-        df = pd.read_csv(f'/opt/airflow/data/{i}/graph.csv')
+        df = pd.read_csv(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month/graph.csv')
         G = nx.Graph()
         for index, row in df.iterrows():
             G.add_edge(row['target'], row['source'] , weight=row['weight'])
@@ -13,9 +13,9 @@ def build_graph():
         bc = nx.betweenness_centrality(Gcc)
         partition = community_louvain.best_partition(Gcc)
 
-        with open(f'/opt/airflow/data/{i}/partition.pkl', 'wb') as f:
+        with open(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month/partition.pkl', 'wb') as f:
             pickle.dump(partition, f)
 
-        with open(f'/opt/airflow/data/{i}/between_centrality.pkl', 'wb') as f:
+        with open(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month/between_centrality.pkl', 'wb') as f:
             pickle.dump(bc, f)
 

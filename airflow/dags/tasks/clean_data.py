@@ -39,7 +39,7 @@ def text_preprocessing(s):
     return s
 
 def clean_data():
-    df = pd.read_csv(f'/opt/airflow/data/{name}.csv')
+    df = pd.read_csv('/opt/airflow/data/arxiv.csv')
     clean_cols = ['abstract']
 
     txt_pipe = Pipeline([('clean_text', FunctionTransformer(lambda x: x.applymap(text_preprocessing)))])
@@ -49,4 +49,4 @@ def clean_data():
     
     df[clean_cols] = col_trans.fit_transform(df)
 
-    df.to_csv(f'/opt/airflow/data/{name}.csv')
+    df.to_csv('/opt/airflow/data/graphs_info_UAE_v3/2024/2024_paper_info.csv')
