@@ -1,3 +1,4 @@
+import os
 import re
 from nltk.corpus import stopwords
 import nltk
@@ -48,5 +49,7 @@ def clean_data():
         )
     
     df[clean_cols] = col_trans.fit_transform(df)
-
-    df.to_csv('/opt/airflow/data/graphs_info_UAE_v3/2024/2024_paper_info.csv')
+    path = '/opt/airflow/data/graphs_info_UAE_v3/2024/2024_paper_info.csv'
+    if not os.path.exists(path):
+        os.mkdir(path)  
+    df.to_csv(path)

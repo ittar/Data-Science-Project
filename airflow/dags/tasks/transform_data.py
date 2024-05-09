@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+import os 
 
 def transform_data():
     model = SentenceTransformer('WhereIsAI/UAE-Large-V1')
@@ -13,21 +14,24 @@ def transform_data():
     
     for i in range(1,13):
         rows_month_i = df.loc[df.month==i]
-        if (len(rows_month_i)): break
-        vector = list(rows_month_i['abs_vector'].values)
-        sims = cosine_similarity(vector, vector)
-        for j in range(len(vector)):
-            for k in range(len(vector)):
-                if j<=k:
-                    sims[j, k] = False
-        indices = np.argwhere(sims > 0.65)
+        # if (len(rows_month_i) == 0): break
         df_node = pd.DataFrame(columns=['target', 'source', 'weight'])
+        vector = list(rows_month_i['abs_vector'].values)
+        if (len(vector) > 0):
+            sims = cosine_similarity(vector, vector)
+            for j in range(len(vector)):
+                for k in range(len(vector)):
+                    if j<=k:
+                        sims[j, k] = False
+        else: sims = np.arra([])
+        indices = np.argwhere(sims > 0.65)
 
         for index in indices:
             target = index[0]
             source = index[1]
             weight = sims[index[0], index[1]]
             app_df = pd.DataFrame({'target': [target], 'source': [source], 'weight': [weight]})
-            tmp_df = pd.concat([tmp_df, app_df])
-
+            df_node = pd.concat([df_node, app_df])
+        if not os.path.exists(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month'):
+            os.mkdir(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month')  
         df_node.to_csv(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month/graph.csv')

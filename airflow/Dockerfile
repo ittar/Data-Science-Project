@@ -1,4 +1,4 @@
-FROM apache/airflow:2.6.0
+FROM apache/airflow:2.7.1
 COPY requirements.txt .
 # RUN apt-get install python3.10 python3.10-venv python3.10-dev
 # RUN python -m pip install --upgrade pip
