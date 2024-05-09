@@ -11,7 +11,7 @@ import streamlit as st
 from datetime import datetime
 
 
-folder_path = "../data/graphs_info_UAE_v3/"
+folder_path = "data/"
 
 @st.cache_data
 def load_graph_data(year, month):

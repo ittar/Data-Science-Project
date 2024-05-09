@@ -8,10 +8,10 @@ import os
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
 
 def clear_arxiv_file():
-    if os.path.exists('arxiv_data.csv'):
-        with open('arxiv_data.csv', 'w') as file:
+    if os.path.exists('arxiv_data_yukama.csv'):
+        with open('arxiv_data_yukama.csv', 'w') as file:
             file.close
-        with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
+        with open('arxiv_data_yukama.csv', 'a', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(['title','abstract','day','month','year'])
 
@@ -119,21 +119,21 @@ params5 = {
 
 link_from_month = [params1, params2, params3, params4, params5]
 
-links = get_all_main_links()
-time.sleep(1)
+# links = get_all_main_links()
+# time.sleep(1)
 clear_arxiv_file()
-for link in links:
-    if(link[1:].split('/')[0] == 'archive'):
-        continue
-    request = requests.get("https://arxiv.org" + link, headers=headers)
-    soup = BeautifulSoup(request.content, 'html.parser')
-    inside_files = [x['href'] for x in soup.find('div', id='dlpage').find_all('a', title='Abstract')]
-    for inside_file in inside_files:
-        data = get_data_by_link("https://arxiv.org" + inside_file)
+# for link in links:
+#     if(link[1:].split('/')[0] == 'archive'):
+#         continue
+#     request = requests.get("https://arxiv.org" + link, headers=headers)
+#     soup = BeautifulSoup(request.content, 'html.parser')
+#     inside_files = [x['href'] for x in soup.find('div', id='dlpage').find_all('a', title='Abstract')]
+#     for inside_file in inside_files:
+#         data = get_data_by_link("https://arxiv.org" + inside_file)
 
-        with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow(data)
+#         with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
+#             writer = csv.writer(file)
+#             writer.writerow(data)
 
 for param in link_from_month:
     request = requests.get("https://arxiv.org/search/advanced", headers=headers, params= param)
@@ -142,7 +142,7 @@ for param in link_from_month:
     for inside_file in inside_files:
         data = get_data_by_link(inside_file)
 
-        with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
+        with open('arxiv_data_yukama.csv', 'a', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(data)
             time.sleep(1)
