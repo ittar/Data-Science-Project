@@ -5,6 +5,8 @@ import requests
 import time
 import os
 
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+
 def clear_arxiv_file():
     if os.path.exists('arxiv_data.csv'):
         with open('arxiv_data.csv', 'w') as file:
@@ -14,7 +16,7 @@ def clear_arxiv_file():
             writer.writerow(['title','abstract','day','month','year'])
 
 def get_all_main_links():
-    request = requests.get("https://arxiv.org/")
+    request = requests.get("https://arxiv.org/", headers=headers)
     returns_list = []
     if (request.status_code == 200):
         soup = BeautifulSoup(request.content, 'html.parser')
@@ -30,7 +32,7 @@ def get_all_main_links():
 
 def get_data_by_link(file):
     try:
-        inside_req = requests.get(file)
+        inside_req = requests.get(file, headers=headers)
         inside_soup = BeautifulSoup(inside_req.content, 'html.parser')
 
         data = inside_soup.find('div', id='content-inner')
@@ -74,39 +76,71 @@ def month_to_int(month_abbr):
     # Convert the month abbreviation to its corresponding integer
     return month_dict.get(month_abbr, None)
 
-link_from_month = [
-    "https://arxiv.org/search/advanced?advanced=1&terms-0-operator=AND&terms-0-term=&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-year=2024&date-filter_by=date_range&date-from_date=2024-01-01&date-to_date=2024-01-31&date-date_type=submitted_date&abstracts=show&size=200&order=-announced_date_first"
-    "https://arxiv.org/search/advanced?advanced=1&terms-0-operator=AND&terms-0-term=&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-year=2024&date-filter_by=date_range&date-from_date=2024-02-01&date-to_date=2024-02-29&date-date_type=submitted_date&abstracts=show&size=200&order=-announced_date_first"
-    "https://arxiv.org/search/advanced?advanced=1&terms-0-operator=AND&terms-0-term=&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-year=2024&date-filter_by=date_range&date-from_date=2024-03-01&date-to_date=2024-03-31&date-date_type=submitted_date&abstracts=show&size=200&order=-announced_date_first"
-    "https://arxiv.org/search/advanced?advanced=1&terms-0-operator=AND&terms-0-term=&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-year=2024&date-filter_by=date_range&date-from_date=2024-04-01&date-to_date=2024-04-30&date-date_type=submitted_date&abstracts=show&size=200&order=-announced_date_first"
-    "https://arxiv.org/search/advanced?advanced=1&terms-0-operator=AND&terms-0-term=&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-year=2024&date-filter_by=date_range&date-from_date=2024-05-01&date-to_date=2024-05-31&date-date_type=submitted_date&abstracts=show&size=200&order=-announced_date_first"
-]
+params1 = {
+    'advanced': '1',
+    'terms-0-field': 'title',
+    'date-filter_by': 'date_range',
+    'date-from_date': '2024-01-01',
+    'date-to_date': '2024-01-31',
+    'size': '200',
+}
+params2 = {
+    'advanced': '1',
+    'terms-0-field': 'title',
+    'date-filter_by': 'date_range',
+    'date-from_date': '2024-02-01',
+    'date-to_date': '2024-02-29',
+    'size': '200',
+}
+params3 = {
+    'advanced': '1',
+    'terms-0-field': 'title',
+    'date-filter_by': 'date_range',
+    'date-from_date': '2024-03-01',
+    'date-to_date': '2024-03-31',
+    'size': '200',
+}
+params4 = {
+    'advanced': '1',
+    'terms-0-field': 'title',
+    'date-filter_by': 'date_range',
+    'date-from_date': '2024-04-01',
+    'date-to_date': '2024-04-30',
+    'size': '200',
+}
+params5 = {
+    'advanced': '1',
+    'terms-0-field': 'title',
+    'date-filter_by': 'date_range',
+    'date-from_date': '2024-05-01',
+    'date-to_date': '2024-05-31',
+    'size': '200',
+}
 
-print("run")
+link_from_month = [params1, params2, params3, params4, params5]
+
 links = get_all_main_links()
 time.sleep(1)
 clear_arxiv_file()
-#for link in links:
-#    if(link[1:].split('/')[0] == 'archive'):
-#        continue
-#    request = requests.get("https://arxiv.org" + link)
-#    soup = BeautifulSoup(request.content, 'html.parser')
-#    inside_files = [x['href'] for x in soup.find('div', id='dlpage').find_all('a', title='Abstract')]
-#    for inside_file in inside_files:
-#        data = get_data_by_link("https://arxiv.org" + inside_file)
-
-#        with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
-#            writer = csv.writer(file)
-#            writer.writerow(data)
-
-for link in link_from_month:
-    request = requests.get(link)
+for link in links:
+    if(link[1:].split('/')[0] == 'archive'):
+        continue
+    request = requests.get("https://arxiv.org" + link, headers=headers)
     soup = BeautifulSoup(request.content, 'html.parser')
-    print(request.content)
-    inside_files = [x['href'] for x in soup.find('div', class_='content').find_all('a')]
-    print(len(inside_file))
+    inside_files = [x['href'] for x in soup.find('div', id='dlpage').find_all('a', title='Abstract')]
     for inside_file in inside_files:
         data = get_data_by_link("https://arxiv.org" + inside_file)
+
+        with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
+
+for param in link_from_month:
+    request = requests.get("https://arxiv.org/search/advanced", headers=headers, params= param)
+    soup = BeautifulSoup(request.content, 'html.parser')
+    inside_files = [x.find('a')['href'] for x in soup.find('div', class_='content').find_all('li', class_='arxiv-result')]
+    for inside_file in inside_files:
+        data = get_data_by_link(inside_file)
 
         with open('arxiv_data.csv', 'a', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
