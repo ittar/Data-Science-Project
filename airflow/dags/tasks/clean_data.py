@@ -49,7 +49,13 @@ def clean_data():
         )
     
     df[clean_cols] = col_trans.fit_transform(df)
-    path = '/opt/airflow/data/graphs_info/2024/2024_paper_info.csv'
+    graph_path = '/opt/airflow/data/graphs_info/'
+    if not os.path.exists(graph_path):
+        os.mkdir(graph_path)
+    folder_path = os.path.join(graph_path, '2024')
+    if not os.path.exists(folder_path):
+        os.mkdir(folder_path)       
+    path = folder_path + '/2024_paper_info.csv'
     if not os.path.exists(path):
         os.mkdir(path)  
     df.to_csv(path)

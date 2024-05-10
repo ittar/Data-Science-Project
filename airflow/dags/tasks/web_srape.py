@@ -133,4 +133,4 @@ def web_scrape():
             title, abstract, day, month, year = get_data_by_link(inside_file)
             df = pd.concat([df, pd.DataFrame({'title' : [title], 'abstract' : [abstract], 'day': [day], 'month': [month], 'year': [year]})])
             time.sleep(1)
-    df.to_csv('/opt/airflow/data/arxiv.csv')
+    df.to_csv('/opt/airflow/data/arxiv.csv', index=False)
