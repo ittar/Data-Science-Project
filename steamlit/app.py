@@ -148,7 +148,7 @@ selected_month = st.sidebar.slider(
     value=min_month,
     format="YYYY/MM"
 )
-kw_show = st.sidebar.checkbox("Show keyword in network graph")
+kw_show = st.sidebar.checkbox("Show keyword in network graph", value=True)
 year = selected_month.year
 month = selected_month.month
 info_df, df, positions, partition, dc, bc, keywords = load_graph_data(year, month)
@@ -166,7 +166,7 @@ for index, row in df.iterrows():
 fig = draw_graph_3d(G, positions, partition, bc, keywords, "3D graph", min_node_size=20, max_node_size=50)
 
 
-st.title("Streamlit App with Graph Visualization")
+st.title("Graph Visualization")
 st.write("This app demonstrates graph visualization using NetworkX and Streamlit.")
 
 col1, col2 = st.columns([2 , 1])
@@ -188,15 +188,14 @@ with col2:
     papers_per_day = month_df.groupby(['day']).size().reset_index(name='count')
 
     # Display the data in a Streamlit app
-    st.title('Papers Overview')
+    st.header('Papers Overview')
 
     # Add a selectbox for selecting a paper
     selected_paper_title = st.selectbox("Select a paper:", month_df['title'])
 
     # Display detailed information of the selected paper
     selected_paper = month_df[month_df['title'] == selected_paper_title].iloc[0]
-    st.write("### Selected Paper Details:")
-    st.write("**Title:**", selected_paper['title'])
+    st.write("###", selected_paper['title'])
     st.write("**Abstract:**", selected_paper['abstract'])
     st.write("**Abbreviations**", selected_paper['abbrev'])
     st.write("**Publication Date:**", f"{int(selected_paper['day'])}/{int(selected_paper['month'])}/{selected_paper['year']}")
