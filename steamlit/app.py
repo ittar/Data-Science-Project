@@ -15,31 +15,31 @@ st.set_page_config(layout="wide")
 
 folder_path = "../data/graphs_info_1/"
 
+# @st.cache_data
+# def load_data():
+#     data_dict = dict()
+#     for year in [2018,2019,2020,2021,2022,2023,2024]:
+#         year_data = []
+#         for month in range(1,13):
+#             month_data = dict()
+#             year_path = os.path.join(folder_path, f'{str(year)}/')
+#             path = os.path.join(year_path, f'{month}_month/')
+#             with open(os.path.join(path, 'pos.pkl'), 'rb') as f:
+#                 month_data['pos'] = pickle.load(f)
+#             with open(os.path.join(path, 'partition.pkl'), 'rb') as f:
+#                 month_data['partition'] = pickle.load(f)
+#             with open(os.path.join(path, 'degree_centrality.pkl'), 'rb') as f:
+#                 month_data['dc'] = pickle.load(f)
+#             with open(os.path.join(path, 'between_centrality.pkl'), 'rb') as f:
+#                 month_data['bc'] = pickle.load(f)
+#             with open(os.path.join(path, 'topics.pkl'), 'rb') as f:
+#                 month_data['keywords'] = pickle.load(f)
+#             month_data['df'] = pd.read_csv(os.path.join(path, 'graph.csv'))
+#             year_data.append(month_data)
+#         info_df = pd.read_csv(os.path.join(year_path, f'{str(year)}_paper_info.csv'))
+#         data_dict[str(year)] = [year_data, info_df]
+#     return data_dict
 @st.cache_data
-def load_data():
-    data_dict = dict()
-    for year in [2018,2019,2020,2021,2022,2023,2024]:
-        year_data = []
-        for month in range(1,13):
-            month_data = dict()
-            year_path = os.path.join(folder_path, f'{str(year)}/')
-            path = os.path.join(year_path, f'{month}_month/')
-            with open(os.path.join(path, 'pos.pkl'), 'rb') as f:
-                month_data['pos'] = pickle.load(f)
-            with open(os.path.join(path, 'partition.pkl'), 'rb') as f:
-                month_data['partition'] = pickle.load(f)
-            with open(os.path.join(path, 'degree_centrality.pkl'), 'rb') as f:
-                month_data['dc'] = pickle.load(f)
-            with open(os.path.join(path, 'between_centrality.pkl'), 'rb') as f:
-                month_data['bc'] = pickle.load(f)
-            with open(os.path.join(path, 'topics.pkl'), 'rb') as f:
-                month_data['keywords'] = pickle.load(f)
-            month_data['df'] = pd.read_csv(os.path.join(path, 'graph.csv'))
-            year_data.append(month_data)
-        info_df = pd.read_csv(os.path.join(year_path, f'{str(year)}_paper_info.csv'))
-        data_dict[str(year)] = [year_data, info_df]
-    return data_dict
-
 def load_graph_data(year, month):
     year_path = os.path.join(folder_path, f'{str(year)}/')
     path = os.path.join(year_path, f'{month}_month/')
@@ -54,7 +54,9 @@ def load_graph_data(year, month):
     with open(os.path.join(path, 'topics.pkl'), 'rb') as f:
         keywords = pickle.load(f)
     df = pd.read_csv(os.path.join(path, 'graph.csv'))
+    df.set_index(df.columns[0], inplace=True)
     info_df = pd.read_csv(os.path.join(year_path, f'{str(year)}_paper_info.csv'))
+    info_df.set_index(info_df.columns[0], inplace=True)
     return info_df, df, pos, partition, dc, bc, keywords
 
 def load_pickle_data(path):
@@ -86,7 +88,6 @@ def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_nod
         opacity=1,
         hoverinfo='none'
     )
-
     node_x = []
     node_y = []
     node_z = []
@@ -94,6 +95,13 @@ def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_nod
     set_partition = set(partition.values())
     cluster_pos = {pid: [] for pid in set_partition}
     max_title_length = 100
+    texts = []
+    for node in G.nodes():
+        t = info_df.loc[int(node)].title
+        if len(t) > max_title_length:
+            text = f'Title = {t[:max_title_length]}{"<br>"}{t[max_title_length:]}'
+        else : text = f'Title = {t}'
+        texts.append(text)
     for node in G.nodes():
         x, y, z = pos[node]
         node_x.append(x)
@@ -121,7 +129,7 @@ def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_nod
             ),
         ),
         hoverinfo='text',
-        text=[f'Title = {info_df.loc[int(node)].title[:max_title_length]}{"<br>" if len(info_df.loc[int(node)].title) > max_title_length else ""}{info_df.iloc[int(node)].title[max_title_length:]}' for node in G.nodes()],
+        text=texts,
         # text=[f'Title: {node}' for node in G.nodes()],
         textposition='bottom center'
     )
@@ -176,16 +184,11 @@ kw_show = st.sidebar.checkbox("Show keyword in network graph")
 year = selected_month.year
 month = selected_month.month
 info_df, df, positions, partition, dc, bc, keywords = load_graph_data(year, month)
-
 # Load data from CSV files
 affiliations_df = pd.read_csv("../static/data/afflication.csv")
-
 G = nx.Graph()
-
 for index, row in df.iterrows():
     G.add_edge(row['target'], row['source'] , weight=row['weight'])
-
-# Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
 
 fig = draw_graph_3d(G, positions, partition, bc, keywords, "3D graph", min_node_size=20, max_node_size=50)
 
@@ -222,5 +225,4 @@ with col2:
     st.write("### Selected Paper Details:")
     st.write("**Title:**", selected_paper['title'])
     st.write("**Abstract:**", selected_paper['abstract'])
-    st.write("**Abbreviations**", selected_paper['abbrev'])
     st.write("**Publication Date:**", f"{int(selected_paper['day'])}/{int(selected_paper['month'])}/{selected_paper['year']}")
