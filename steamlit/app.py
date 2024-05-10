@@ -15,7 +15,7 @@ st.set_page_config(layout="wide")
 
 folder_path = "../data/graphs_info/"
 
-@st.cache_data
+# @st.cache_data
 def load_graph_data(year, month):
     year_path = os.path.join(folder_path, f'{str(year)}/')
     path = os.path.join(year_path, f'{month}_month/')
@@ -23,8 +23,6 @@ def load_graph_data(year, month):
         pos = pickle.load(f)
     with open(os.path.join(path, 'partition.pkl'), 'rb') as f:
         partition = pickle.load(f)
-    with open(os.path.join(path, 'degree_centrality.pkl'), 'rb') as f:
-        dc = pickle.load(f)
     with open(os.path.join(path, 'between_centrality.pkl'), 'rb') as f:
         bc = pickle.load(f)
     with open(os.path.join(path, 'topics.pkl'), 'rb') as f:
@@ -33,7 +31,7 @@ def load_graph_data(year, month):
     df.set_index(df.columns[0], inplace=True)
     info_df = pd.read_csv(os.path.join(year_path, f'{str(year)}_paper_info.csv'))
     info_df.set_index(info_df.columns[0], inplace=True)
-    return info_df, df, pos, partition, dc, bc, keywords
+    return info_df, df, pos, partition, bc, keywords
 
 def load_pickle_data(path):
     with open(os.path.join(folder_path, path), 'rb') as f:
@@ -159,7 +157,7 @@ selected_month = st.sidebar.slider(
 kw_show = st.sidebar.checkbox("Show keyword in network graph", value=True)
 year = selected_month.year
 month = selected_month.month
-info_df, df, positions, partition, dc, bc, keywords = load_graph_data(year, month)
+info_df, df, positions, partition, bc, keywords = load_graph_data(year, month)
 # Load data from CSV files
 affiliations_df = pd.read_csv("../static/data/afflication.csv")
 G = nx.Graph()

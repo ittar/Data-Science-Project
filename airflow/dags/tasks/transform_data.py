@@ -36,3 +36,4 @@ def transform_data():
         if not os.path.exists(f'/opt/airflow/data/graphs_info/2024/{i}_month'):
             os.mkdir(f'/opt/airflow/data/graphs_info/2024/{i}_month')  
         df_node.to_csv(f'/opt/airflow/data/graphs_info/2024/{i}_month/graph.csv')
+        df.to_csv('/opt/airflow/data/graphs_info/2024/2024_paper_info.csv')

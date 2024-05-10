@@ -12,13 +12,16 @@ def build_graph():
             G.add_edge(row['target'], row['source'] , weight=row['weight'])
         bc = dict()
         partition = dict()
+        pos = []
         if (not is_empty(G)):
             bc = nx.betweenness_centrality(G)
             partition = community_louvain.best_partition(G)
+            pos = nx.spring_layout(G,dim=3, seed=123)
 
         with open(f'/opt/airflow/data/graphs_info/2024/{i}_month/partition.pkl', 'wb') as f:
-                pickle.dump(partition, f)
-
+            pickle.dump(partition, f)
+        with open(f'/opt/airflow/data/graphs_info/2024/{i}_month/pos.pkl', 'wb') as f:
+            pickle.dump(pos, f)
         with open(f'/opt/airflow/data/graphs_info/2024/{i}_month/between_centrality.pkl', 'wb') as f:
-                pickle.dump(bc, f)
+            pickle.dump(bc, f)
 
