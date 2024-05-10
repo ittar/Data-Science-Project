@@ -3,6 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.offline import plot
+import plotly.express as px
 from plotly.express.colors import sample_colorscale
 import os
 import pandas as pd
@@ -11,11 +12,11 @@ import streamlit as st
 from datetime import datetime
 
 
-folder_path = "../data/graphs_info_UAE_v3/"
+folder_path = "data/"
 
 @st.cache_data
 def load_graph_data(year, month):
-    year_path = os.path.join(folder_path, str(year))
+    year_path = os.path.join(folder_path, f'{str(year)}/')
     path = os.path.join(year_path, f'{month}_month/')
     with open(os.path.join(path, 'pos.pkl'), 'rb') as f:
         pos = pickle.load(f)
@@ -132,6 +133,15 @@ def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_nod
     return fig
 
 st.title('Streamlit Assignment')
+
+df = pd.read_csv("ETL/afflication.csv")
+
+heatmap_data = df.groupby(['country', 'city', 'organization_name']).size().reset_index(name='size')
+
+st.header("1")
+st.write(heatmap_data)
+
+
 # Slider for selecting month from January 2018 to December 2023
 min_month = datetime(2018, 1, 1)
 max_month = datetime(2023, 12, 1)
@@ -156,4 +166,11 @@ Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
 
 fig = draw_graph_3d(Gcc, positions, partition, bc, keywords, "3D graph", min_node_size=10, max_node_size=100)
 
+st.header("3D Cluster Graph")
+st.plotly_chart(fig)
+
+
+fig = px.pie(heatmap_data, values='size', names='country', hole=0.3)
+
+st.header("2")
 st.plotly_chart(fig)
