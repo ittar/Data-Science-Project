@@ -124,16 +124,6 @@ def web_scrape():
     time.sleep(1)
     clear_arxiv_file()
     df = pd.DataFrame(columns=['title','abstract','day','month','year'])
-    # for link in links:
-    #     if(link[1:].split('/')[0] == 'archive'):
-    #         continue
-    #     request = requests.get("https://arxiv.org" + link, headers=headers)
-    #     soup = BeautifulSoup(request.content, 'html.parser')
-    #     inside_files = [x['href'] for x in soup.find('div', id='dlpage').find_all('a', title='Abstract')]
-    #     for inside_file in inside_files:
-    #         title, abstract, day, month, year = get_data_by_link("https://arxiv.org" + inside_file)
-    #         df = pd.concat([df, pd.DataFrame({'title' : [title], 'abstract' : [abstract], 'day': [day], 'month': [month], 'year': [year]})])
-    #         time.sleep(1)
             
     for param in link_from_month:
         request = requests.get("https://arxiv.org/search/advanced", headers=headers, params= param)

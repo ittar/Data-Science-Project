@@ -192,9 +192,10 @@ for index, row in df.iterrows():
 
 fig = draw_graph_3d(G, positions, partition, bc, keywords, "3D graph", min_node_size=20, max_node_size=50)
 
+month_df = info_df.loc[info_df.month == month]
 
 st.title("Graph Visualization")
-st.header(f'{year}/{month} : {info_df.size} Papers')
+st.header(f'{year}/{month} : {len(month_df)} Papers')
 
 col1, col2 = st.columns([2 , 1])
 
@@ -211,7 +212,6 @@ with col1:
     st.plotly_chart(heat_fig)
     
 with col2:
-    month_df = info_df.loc[info_df.month == month]
     papers_per_day = month_df.groupby(['day']).size().reset_index(name='count')
 
     # Display the data in a Streamlit app
