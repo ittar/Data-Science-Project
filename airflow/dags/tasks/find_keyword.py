@@ -7,12 +7,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 def find_keyword():
     df = pd.read_csv(f'/opt/airflow/data/graphs_info/2024/2024_paper_info.csv')
-    words = df.abstract.values
     for i in range(1,13):
         with open(f'/opt/airflow/data/graphs_info/2024/{i}_month/partition.pkl', 'rb') as f:
             partition = pickle.load(f)
         set_partition = set(partition.values())
-        key_list = np.array([words[int(key)] for key in partition.keys()])
+        key_list = df.loc[list(partition.keys())].abstract.values
         val_list = np.array(list(partition.values()))
         partition_nodes = {pid: key_list[np.where(val_list == pid)] for pid in set_partition}
         keywords_group = dict()

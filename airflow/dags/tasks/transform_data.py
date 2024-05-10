@@ -17,6 +17,7 @@ def transform_data():
         # if (len(rows_month_i) == 0): break
         df_node = pd.DataFrame(columns=['target', 'source', 'weight'])
         vector = list(rows_month_i['abs_vector'].values)
+        index_vector = rows_month_i.index
         if (len(vector) > 0):
             sims = cosine_similarity(vector, vector)
             for j in range(len(vector)):
@@ -27,8 +28,8 @@ def transform_data():
         indices = np.argwhere(sims > 0.65)
 
         for index in indices:
-            target = index[0]
-            source = index[1]
+            target = index_vector[index[0]]
+            source = index_vector[index[1]]
             weight = sims[index[0], index[1]]
             app_df = pd.DataFrame({'target': [target], 'source': [source], 'weight': [weight]})
             df_node = pd.concat([df_node, app_df])
