@@ -12,7 +12,7 @@ import streamlit as st
 from datetime import datetime
 
 
-folder_path = "data/"
+folder_path = "../data/graphs_info_g7/"
 
 @st.cache_data
 def load_graph_data(year, month):
@@ -45,7 +45,7 @@ def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_nod
     weights = []
     weight_values = nx.get_edge_attributes(G, 'weight')
     # # pos = nx.spring_layout(graph, dim=3, k=1e-4, seed=123)
-    pos = nx.kamada_kawai_layout(G, dim=3,)
+    # pos = nx.kamada_kawai_layout(G, dim=3,)
     for edge in G.edges():
         x0, y0, z0 = pos[edge[0]]
         x1, y1, z1 = pos[edge[1]]
@@ -56,9 +56,9 @@ def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_nod
     
     edge_trace = go.Scatter3d(
         x=edge_x, y=edge_y, z=edge_z,
-        line=dict(width=1, color='grey'),
+        line=dict(width=3, color='grey'),
         mode='lines',
-        opacity=0.5,
+        opacity=1,
         hoverinfo='none'
     )
 
@@ -132,19 +132,10 @@ def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_nod
     
     return fig
 
-st.title('Streamlit Assignment')
-
-df = pd.read_csv("ETL/afflication.csv")
-
-heatmap_data = df.groupby(['country', 'city', 'organization_name']).size().reset_index(name='size')
-
-st.header("1")
-st.write(heatmap_data)
-
 
 # Slider for selecting month from January 2018 to December 2023
 min_month = datetime(2018, 1, 1)
-max_month = datetime(2023, 12, 1)
+max_month = datetime(2024, 5, 1)
 selected_month = st.sidebar.slider(
     "Select Month",
     min_value=min_month,
@@ -162,15 +153,9 @@ G = nx.Graph()
 for index, row in df.iterrows():
     G.add_edge(row['target'], row['source'] , weight=row['weight'])
 
-Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
+# Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
 
-fig = draw_graph_3d(Gcc, positions, partition, bc, keywords, "3D graph", min_node_size=10, max_node_size=100)
+fig = draw_graph_3d(G, positions, partition, bc, keywords, "3D graph", min_node_size=20, max_node_size=60)
 
 st.header("3D Cluster Graph")
-st.plotly_chart(fig)
-
-
-fig = px.pie(heatmap_data, values='size', names='country', hole=0.3)
-
-st.header("2")
 st.plotly_chart(fig)
