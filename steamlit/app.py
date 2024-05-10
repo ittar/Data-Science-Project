@@ -15,30 +15,6 @@ st.set_page_config(layout="wide")
 
 folder_path = "../data/graphs_info/"
 
-# @st.cache_data
-# def load_data():
-#     data_dict = dict()
-#     for year in [2018,2019,2020,2021,2022,2023,2024]:
-#         year_data = []
-#         for month in range(1,13):
-#             month_data = dict()
-#             year_path = os.path.join(folder_path, f'{str(year)}/')
-#             path = os.path.join(year_path, f'{month}_month/')
-#             with open(os.path.join(path, 'pos.pkl'), 'rb') as f:
-#                 month_data['pos'] = pickle.load(f)
-#             with open(os.path.join(path, 'partition.pkl'), 'rb') as f:
-#                 month_data['partition'] = pickle.load(f)
-#             with open(os.path.join(path, 'degree_centrality.pkl'), 'rb') as f:
-#                 month_data['dc'] = pickle.load(f)
-#             with open(os.path.join(path, 'between_centrality.pkl'), 'rb') as f:
-#                 month_data['bc'] = pickle.load(f)
-#             with open(os.path.join(path, 'topics.pkl'), 'rb') as f:
-#                 month_data['keywords'] = pickle.load(f)
-#             month_data['df'] = pd.read_csv(os.path.join(path, 'graph.csv'))
-#             year_data.append(month_data)
-#         info_df = pd.read_csv(os.path.join(year_path, f'{str(year)}_paper_info.csv'))
-#         data_dict[str(year)] = [year_data, info_df]
-#     return data_dict
 @st.cache_data
 def load_graph_data(year, month):
     year_path = os.path.join(folder_path, f'{str(year)}/')
