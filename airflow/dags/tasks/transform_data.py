@@ -24,7 +24,7 @@ def transform_data():
                 for k in range(len(vector)):
                     if j<=k:
                         sims[j, k] = False
-        else: sims = np.arra([])
+        else: sims = np.array([])
         indices = np.argwhere(sims > 0.65)
 
         for index in indices:
