@@ -13,7 +13,7 @@ from datetime import datetime
 
 st.set_page_config(layout="wide")
 
-folder_path = "../data/graphs_info_1/"
+folder_path = "../data/graphs_info/"
 
 # @st.cache_data
 # def load_data():
