@@ -1,4 +1,5 @@
-data/
 logs/
 plugins/
 __pycache__/
+backup/
+/data/
