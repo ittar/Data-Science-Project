@@ -7,7 +7,7 @@ import os
 def transform_data():
     model = SentenceTransformer('WhereIsAI/UAE-Large-V1')
 
-    df = pd.read_csv('/opt/airflow/data/graphs_info_UAE_v3/2024/2024_paper_info.csv')
+    df = pd.read_csv('/opt/airflow/data/graphs_info/2024/2024_paper_info.csv')
     words = df.abstract.values
     vectors = model.encode(words)
     df['abs_vector'] = vectors.tolist()
@@ -32,6 +32,6 @@ def transform_data():
             weight = sims[index[0], index[1]]
             app_df = pd.DataFrame({'target': [target], 'source': [source], 'weight': [weight]})
             df_node = pd.concat([df_node, app_df])
-        if not os.path.exists(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month'):
-            os.mkdir(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month')  
-        df_node.to_csv(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month/graph.csv')
+        if not os.path.exists(f'/opt/airflow/data/graphs_info/2024/{i}_month'):
+            os.mkdir(f'/opt/airflow/data/graphs_info/2024/{i}_month')  
+        df_node.to_csv(f'/opt/airflow/data/graphs_info/2024/{i}_month/graph.csv')

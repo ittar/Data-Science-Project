@@ -6,10 +6,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def find_keyword():
-    df = pd.read_csv(f'/opt/airflow/data/graphs_info_UAE_v3/2024/2024_paper_info.csv')
+    df = pd.read_csv(f'/opt/airflow/data/graphs_info/2024/2024_paper_info.csv')
     words = df.abstract.values
     for i in range(1,13):
-        with open(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month/partition.pkl', 'rb') as f:
+        with open(f'/opt/airflow/data/graphs_info/2024/{i}_month/partition.pkl', 'rb') as f:
             partition = pickle.load(f)
         set_partition = set(partition.values())
         key_list = np.array([words[int(key)] for key in partition.keys()])
@@ -26,5 +26,5 @@ def find_keyword():
             important_words_sorted = dict(sorted(important_words.items(), key=lambda x: x[1], reverse=True))
             annotation_text = "/ ".join(list(important_words_sorted.keys())[:top_n])
             keywords_group[pid] = annotation_text
-        with open(f'/opt/airflow/data/graphs_info_UAE_v3/2024/{i}_month/topics.pkl', 'wb') as f:
+        with open(f'/opt/airflow/data/graphs_info/2024/{i}_month/topics.pkl', 'wb') as f:
             pickle.dump(keywords_group, f)      

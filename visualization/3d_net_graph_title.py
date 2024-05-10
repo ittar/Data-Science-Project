@@ -12,7 +12,7 @@ import streamlit as st
 from datetime import datetime
 
 
-folder_path = "../data/graphs_info_g7/"
+folder_path = "../data/graphs_info_g6/"
 
 @st.cache_data
 def load_graph_data(year, month):
@@ -116,7 +116,7 @@ def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_nod
             showarrow=False,
             font=dict(
                 color=colors[pid],
-                size=20
+                size=10
             ),
             opacity=1
         )
@@ -127,8 +127,12 @@ def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_nod
         showlegend=False,
         width=800,  # Adjust figure width
         height=800,  # Adjust figure height
-        scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False, annotations=annotations),
+        scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
     )
+    if (kw_show) :
+        fig.update_layout(
+            scene=dict(annotations=annotations),
+        )
     
     return fig
 
@@ -143,6 +147,7 @@ selected_month = st.sidebar.slider(
     value=min_month,
     format="YYYY/MM"
 )
+kw_show = st.sidebar.checkbox("Show keyword in network graph")
 year = selected_month.year
 month = selected_month.month
 info_df, df, positions, partition, dc, bc, keywords = load_graph_data(year, month)
@@ -155,7 +160,7 @@ for index, row in df.iterrows():
 
 # Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
 
-fig = draw_graph_3d(G, positions, partition, bc, keywords, "3D graph", min_node_size=20, max_node_size=60)
+fig = draw_graph_3d(G, positions, partition, bc, keywords, "3D graph", min_node_size=20, max_node_size=50)
 
 st.header("3D Cluster Graph")
 st.plotly_chart(fig)
