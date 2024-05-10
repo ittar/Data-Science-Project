@@ -194,7 +194,7 @@ fig = draw_graph_3d(G, positions, partition, bc, keywords, "3D graph", min_node_
 
 
 st.title("Graph Visualization")
-st.write("This app demonstrates graph visualization using NetworkX and Streamlit.")
+st.header(f'{year}/{month} : {info_df.size} Papers')
 
 col1, col2 = st.columns([2 , 1])
 
