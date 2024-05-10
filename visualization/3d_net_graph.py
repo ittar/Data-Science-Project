@@ -3,44 +3,48 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.offline import plot
+import plotly.express as px
 from plotly.express.colors import sample_colorscale
 import os
 import pandas as pd
 import pickle 
 import streamlit as st
 from datetime import datetime
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-folder_path = "../data/graphs_info/"
+folder_path = "data/"
 
 @st.cache_data
 def load_graph_data(year, month):
-    path = os.path.join(folder_path, f"{str(year)}/{month}_month/")
+    year_path = os.path.join(folder_path, f'{str(year)}/')
+    path = os.path.join(year_path, f'{month}_month/')
     with open(os.path.join(path, 'pos.pkl'), 'rb') as f:
         pos = pickle.load(f)
-    with open(os.path.join(path, 'paritition.pkl'), 'rb') as f:
+    with open(os.path.join(path, 'partition.pkl'), 'rb') as f:
         partition = pickle.load(f)
     with open(os.path.join(path, 'degree_centrality.pkl'), 'rb') as f:
         dc = pickle.load(f)
     with open(os.path.join(path, 'between_centrality.pkl'), 'rb') as f:
         bc = pickle.load(f)
+    with open(os.path.join(path, 'topics.pkl'), 'rb') as f:
+        keywords = pickle.load(f)
     df = pd.read_csv(os.path.join(path, 'graph.csv'))
-    return df, pos, partition, dc, bc
+    info_df = pd.read_csv(os.path.join(year_path, f'{str(year)}_paper_info.csv'))
+    return info_df, df, pos, partition, dc, bc, keywords
 
 def load_pickle_data(path):
     with open(os.path.join(folder_path, path), 'rb') as f:
         return pickle.load(f)
 
-def draw_graph_3d(G, pos, partition, measures, title, min_node_size, max_node_size, top_n = 5):
+def draw_graph_3d(G, pos, partition, measures, kw, title, min_node_size, max_node_size, top_n = 5):
     centrality = np.array(list(measures.values()))
-    centrality_size = (((centrality-min(centrality))/(max(centrality)-min(centrality))) * (max_node_size-min_node_size)) + min_node_size
+    centrality_size = (((centrality-min(centrality))/(max(centrality)-min(centrality) + 1e-4)) * (max_node_size-min_node_size)) + min_node_size
     edge_x = []
     edge_y = []
     edge_z = []
     weights = []
     weight_values = nx.get_edge_attributes(G, 'weight')
-    # pos = nx.spring_layout(graph, dim=3, k=1e-4, seed=123)
+    # # pos = nx.spring_layout(graph, dim=3, k=1e-4, seed=123)
     pos = nx.kamada_kawai_layout(G, dim=3,)
     for edge in G.edges():
         x0, y0, z0 = pos[edge[0]]
@@ -54,7 +58,7 @@ def draw_graph_3d(G, pos, partition, measures, title, min_node_size, max_node_si
         x=edge_x, y=edge_y, z=edge_z,
         line=dict(width=1, color='grey'),
         mode='lines',
-        opacity=0.8,
+        opacity=0.5,
         hoverinfo='none'
     )
 
@@ -63,9 +67,8 @@ def draw_graph_3d(G, pos, partition, measures, title, min_node_size, max_node_si
     node_z = []
     node_colors = []  # List to store node colors
     set_partition = set(partition.values())
-    partition_nodes = {pid: [] for pid in set_partition}
     cluster_pos = {pid: [] for pid in set_partition}
-    
+    max_title_length = 100
     for node in G.nodes():
         x, y, z = pos[node]
         node_x.append(x)
@@ -73,7 +76,6 @@ def draw_graph_3d(G, pos, partition, measures, title, min_node_size, max_node_si
         node_z.append(z)
         partition_node = partition[node]
         node_colors.append(partition_node)
-        partition_nodes[partition_node].append(node)
         cluster_pos[partition_node].append((x,y,z))
 
     node_trace = go.Scatter3d(
@@ -94,35 +96,15 @@ def draw_graph_3d(G, pos, partition, measures, title, min_node_size, max_node_si
             ),
         ),
         hoverinfo='text',
-        text=[f'Node {node}' for node in G.nodes()],
+        text=[f'Title = {info_df.iloc[int(node)].title[:max_title_length]}{"<br>" if len(info_df.iloc[int(node)].title) > max_title_length else ""}{info_df.iloc[int(node)].title[max_title_length:]}' for node in G.nodes()],
+        # text=[f'Title: {node}' for node in G.nodes()],
         textposition='bottom center'
     )
-
-    # invisible_similarity_trace = go.Scatter3d(
-    #     x=node_x, y=node_y, z=node_z,
-    #     mode='markers',
-    #     hoverinfo='text',
-    #     marker=dict(
-    #         color=[],
-    #         opacity=0,
-    #     )
-    # )
-    # invisible_similarity_trace.text=weights
     colors = sample_colorscale("Viridis", [n/(len(set(node_colors)) -1) for n in range(len(set(node_colors)))])
-    # node_text = []
-    # for node, adjacencies in enumerate(G.adjacency()):
-    #     node_text.append(adjacencies[0])
-    # node_trace.text = node_text
 
-    tf_idf = TfidfVectorizer()
     annotations = []
-    for pid in set_partition :
-        output = tf_idf.fit_transform(partition_nodes[pid])
-        feature_names = tf_idf.get_feature_names_out()
-        tfidf_scores = output.max(0).toarray()[0]
-        important_words = {word: score for word, score in zip(feature_names, tfidf_scores)}
-        important_words_sorted = dict(sorted(important_words.items(), key=lambda x: x[1], reverse=True))
-        annotation_text = "/ ".join(list(important_words_sorted.keys())[:top_n])
+    for pid in set_partition:
+        annotation_text = kw[pid]
         p = np.array(cluster_pos[pid]).mean(axis=0)
         annotation = dict(
             x=p[0],
@@ -151,6 +133,15 @@ def draw_graph_3d(G, pos, partition, measures, title, min_node_size, max_node_si
     return fig
 
 st.title('Streamlit Assignment')
+
+df = pd.read_csv("ETL/afflication.csv")
+
+heatmap_data = df.groupby(['country', 'city', 'organization_name']).size().reset_index(name='size')
+
+st.header("1")
+st.write(heatmap_data)
+
+
 # Slider for selecting month from January 2018 to December 2023
 min_month = datetime(2018, 1, 1)
 max_month = datetime(2023, 12, 1)
@@ -163,7 +154,7 @@ selected_month = st.sidebar.slider(
 )
 year = selected_month.year
 month = selected_month.month
-df, positions, partition, dc, bc = load_graph_data(year, month)
+info_df, df, positions, partition, dc, bc, keywords = load_graph_data(year, month)
 
 
 G = nx.Graph()
@@ -173,6 +164,13 @@ for index, row in df.iterrows():
 
 Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
 
-fig = draw_graph_3d(Gcc, positions, partition, bc, "3D graph", min_node_size=10, max_node_size=100)
+fig = draw_graph_3d(Gcc, positions, partition, bc, keywords, "3D graph", min_node_size=10, max_node_size=100)
 
+st.header("3D Cluster Graph")
+st.plotly_chart(fig)
+
+
+fig = px.pie(heatmap_data, values='size', names='country', hole=0.3)
+
+st.header("2")
 st.plotly_chart(fig)
