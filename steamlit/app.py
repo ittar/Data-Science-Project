@@ -11,6 +11,7 @@ import pickle
 import streamlit as st
 from datetime import datetime
 
+st.set_page_config(layout="wide")
 
 folder_path = "../data/graphs_info/"
 
@@ -152,6 +153,8 @@ year = selected_month.year
 month = selected_month.month
 info_df, df, positions, partition, dc, bc, keywords = load_graph_data(year, month)
 
+# Load data from CSV files
+affiliations_df = pd.read_csv("../static/data/afflication.csv")
 
 G = nx.Graph()
 
@@ -162,57 +165,38 @@ for index, row in df.iterrows():
 
 fig = draw_graph_3d(G, positions, partition, bc, keywords, "3D graph", min_node_size=20, max_node_size=50)
 
-st.header("3D Cluster Graph")
-st.plotly_chart(fig)
-
-
 
 st.title("Streamlit App with Graph Visualization")
 st.write("This app demonstrates graph visualization using NetworkX and Streamlit.")
 
-# Load data from CSV files
-affiliations_df = pd.read_csv("ETL/afflication.csv")
+col1, col2 = st.columns([2 , 1])
 
-# Display the DataFrame
-st.write("Grouped Data:")
-st.write(affiliations_df)
+with col1:
 
-# Create the donut chart
-heatmap_data = affiliations_df.groupby(['country', 'city', 'organization_name']).size().reset_index(name='size')
-fig = px.pie(heatmap_data, values='size', names='country', hole=0.3)
+    st.header("3D Cluster Graph")
+    st.plotly_chart(fig)
 
-st.write("Donut Chart:")
-st.plotly_chart(fig)
+    # Create the donut chart
+    heatmap_data = affiliations_df.groupby(['country']).size().reset_index(name='size')
+    heat_fig = px.pie(heatmap_data, values='size', names='country', hole=0, title='Author\'s Country Chart', )
+    heat_fig.update_traces(textposition='inside')
+    heat_fig.update_layout(uniformtext_minsize=12, uniformtext_mode='hide')
+    st.plotly_chart(heat_fig)
+    
+with col2:
+    month_df = info_df.loc[info_df.month == month]
+    papers_per_day = month_df.groupby(['day']).size().reset_index(name='count')
 
+    # Display the data in a Streamlit app
+    st.title('Papers Overview')
 
-# Arxiv_data_yukama
+    # Add a selectbox for selecting a paper
+    selected_paper_title = st.selectbox("Select a paper:", month_df['title'])
 
-data_path = "arxiv_data_yukama.csv"
-data = pd.read_csv(data_path)
-papers_per_day = data.groupby(['day', 'month', 'year']).size().reset_index(name='count')
-
-# Display the data in a Streamlit app
-st.title('ArXiv Papers Overview')
-
-# Show the data as a table
-st.write("### Papers Overview:")
-st.write(data)
-
-# Add a selectbox for selecting a paper
-selected_paper_title = st.selectbox("Select a paper:", data['title'])
-
-# Display detailed information of the selected paper
-selected_paper = data[data['title'] == selected_paper_title].iloc[0]
-st.write("### Selected Paper Details:")
-st.write("**Title:**", selected_paper['title'])
-st.write("**Abstract:**", selected_paper['abstract'])
-st.write("**Publication Date:**", f"{selected_paper['day']}/{selected_paper['month']}/{selected_paper['year']}")
-
-# Visualize the frequency of papers published per day
-st.write("### Papers Published per Day:")
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=papers_per_day, x='day', y='count', palette='viridis', ax=ax)
-ax.set_xlabel('Day')
-ax.set_ylabel('Number of Papers')
-ax.set_title('Number of Papers Published per Day')
-st.pyplot(fig)
+    # Display detailed information of the selected paper
+    selected_paper = month_df[month_df['title'] == selected_paper_title].iloc[0]
+    st.write("### Selected Paper Details:")
+    st.write("**Title:**", selected_paper['title'])
+    st.write("**Abstract:**", selected_paper['abstract'])
+    st.write("**Abbreviations**", selected_paper['abbrev'])
+    st.write("**Publication Date:**", f"{int(selected_paper['day'])}/{int(selected_paper['month'])}/{selected_paper['year']}")
